@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
-        $this->call(BucketAndBallSeeder::class);
+//        $this->call(BucketAndBallSeeder::class);
 
     }
 }

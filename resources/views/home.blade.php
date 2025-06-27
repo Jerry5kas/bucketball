@@ -46,7 +46,28 @@
 
             </form>
         </div>
-        <div class="grid grid-cols-5 md:grid-cols-5 gap-4">
+
+        <div class="grid grid-cols-2 gap-6 mt-8 text-white">
+            <!-- Add Bucket Form -->
+            <form action="{{ route('buckets.store') }}" method="POST" class="bg-slate-800 p-4 rounded-xl space-y-4">
+                @csrf
+                <h2 class="text-lg font-bold">Add New Bucket</h2>
+                <input name="name" type="text" placeholder="Bucket Name" class="w-full px-4 py-2 border border-white rounded text-white" required>
+                <input name="total_volume" type="number" step="0.1" placeholder="Total Volume" class="w-full px-4 py-2  border border-whiterounded text-white" required>
+                <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-white border border-white hover:bg-blue-700">Add Bucket</button>
+            </form>
+
+            <!-- Add Ball Form -->
+            <form action="{{ route('balls.store') }}" method="POST" class="bg-slate-800 p-4 rounded-xl space-y-4">
+                @csrf
+                <h2 class="text-lg font-bold">Add New Ball</h2>
+                <input name="color" type="text" placeholder="Ball Color" class="w-full px-4 py-2 rounded border border-white text-white" required>
+                <input name="volume" type="number" step="0.1" placeholder="Volume" class="w-full px-4 py-2 rounded border border-white text-white" required>
+                <button type="submit" class="bg-green-600 px-4 py-2 rounded text-white border border-white hover:bg-green-700">Add Ball</button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-5 md:grid-cols-5 gap-4 py-5 ">
             @php
                 // Define a set of color classes
                 $colors = ['text-red-700', 'text-green-700', 'text-blue-700', 'text-yellow-700', 'text-purple-700', 'text-pink-700', 'text-indigo-700'];
@@ -78,11 +99,15 @@
         @csrf
         @foreach ($balls as $ball)
             <div>
-                <label class="block font-semibold">{{ $ball->color }} Balls</label>
+                <label class="block font-semibold">
+                    {{ $ball->color }} Balls
+                    <span class="text-sm text-gray-500">(Volume: {{ $ball->volume }} in³)</span>
+                </label>
                 <input type="number" name="balls[{{ $ball->color }}]" class="w-full border rounded px-4 py-2 mt-1"
                        min="0" placeholder="Enter quantity">
             </div>
         @endforeach
+
 
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit</button>
     </form>

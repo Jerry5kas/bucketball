@@ -72,70 +72,34 @@ class BucketSuggestionController extends Controller
         return redirect()->route('home')->with('suggestions', $suggestions);
     }
 
-
-    public function suggestPlacement(Request $request)
+    public function storeBucket(Request $request)
     {
-        $request->validate([
-            'balls' => 'required|array',
-            'balls.*.color' => 'required|string|exists:balls,color',
-            'balls.*.quantity' => 'required|integer|min:1'
+        $validated = $request->validate([
+            'name' => 'required|string|unique:buckets,name',
+            'total_volume' => 'required|numeric|min:0.1',
         ]);
 
-        $sessionId = session()->getId();
-        $buckets = Bucket::orderByDesc('empty_volume')->get();
-        $ballsInput = collect($request->balls);
-
-        $ballsMap = Ball::whereIn('color', $ballsInput->pluck('color'))->get()->keyBy('color');
-        $suggestions = [];
-
-        foreach ($ballsInput as $ball) {
-            $ballObj = $ballsMap[$ball['color']];
-            $remaining = $ball['quantity'];
-            $ballVolume = $ballObj->volume;
-
-            foreach ($buckets as $bucket) {
-                $canFit = floor($bucket->empty_volume / $ballVolume);
-                if ($canFit <= 0) continue;
-
-                $toPlace = min($canFit, $remaining);
-                if ($toPlace > 0) {
-                    $bucket->empty_volume -= $toPlace * $ballVolume;
-                    $bucket->save();
-
-                    BallPlacement::create([
-                        'bucket_id' => $bucket->id,
-                        'ball_id' => $ballObj->id,
-                        'quantity' => $toPlace,
-                        'session_id' => $sessionId
-                    ]);
-
-                    $suggestions[] = [
-                        'bucket' => $bucket->name,
-                        'color' => $ballObj->color,
-                        'quantity' => $toPlace
-                    ];
-
-                    $remaining -= $toPlace;
-                }
-
-                if ($remaining <= 0) break;
-            }
-
-            if ($remaining > 0) {
-                $suggestions[] = [
-                    'bucket' => null,
-                    'color' => $ballObj->color,
-                    'quantity' => $remaining,
-                    'message' => 'Not enough space to place all balls.'
-                ];
-            }
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'suggestions' => $suggestions
+        Bucket::create([
+            'name' => $validated['name'],
+            'total_volume' => $validated['total_volume'],
+            'empty_volume' => $validated['total_volume'],
         ]);
+
+        return redirect()->route('home')->with('success', 'Bucket added successfully.');
     }
+
+    public function storeBall(Request $request)
+    {
+        $validated = $request->validate([
+            'color' => 'required|string|unique:balls,color',
+            'volume' => 'required|numeric|min:0.1',
+        ]);
+
+        Ball::create($validated);
+
+        return redirect()->route('home')->with('success', 'Ball added successfully.');
+    }
+
 
 
     public function resetVolumes(Request $request)
