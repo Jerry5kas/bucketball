@@ -13,8 +13,10 @@ class BucketSuggestionController extends Controller
     public function index()
     {
         $balls = Ball::all();
-        return view('home', compact('balls'));
+        $buckets = Bucket::all();
+        return view('home', compact('balls', 'buckets'));
     }
+
 
     public function suggest(Request $request)
     {
